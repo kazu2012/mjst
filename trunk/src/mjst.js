@@ -1,5 +1,6 @@
 /*!
  * @project mjst - Micro JavaScript Template Engine
+ * @repository http://code.google.com/p/mjst/
  * @author Andrea Giammarchi
  * @license Mit Style
  * @version 0.1.0
