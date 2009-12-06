@@ -48,7 +48,7 @@ function html(childNodes, data){
          * In any case, we are talking about just one extra character .................. <js-myVar/>
          * I am considering to implement a runtime namespace to handle this case as well <js:myVar/> but right now this is not supported
          */
-        if(tmp = (nodeName = xml.nodeName).match(/^(?:js|jst|mjs|mjst|jscript|javascript)(?:-([$.\w]+))?$/i)){
+        if(tmp = (nodeName = xml.nodeName).match(/^(?:js|jst|mjs|mjst|jscript|javascript)(?:-([$.[\]"'+\w]+))?$/i)){
           data.push(tmp[1] ? "print(" + tmp[1] + ")" : nodeValue(xml), n);
         } else {
           for(var
@@ -127,7 +127,7 @@ function replace(string, match){
  * @return {String} sanitized string
  */
 function value(data){
-  return data.replace(/\\|'|\$\{([$.\w]+)\}/g, replace)
+  return data.replace(/\\|'|\$\{([$.[\]"'+\w]+)\}/g, replace)
   /*TODO: test if 3 replaces without function are faster (both massive and small templates)
   return data.replace("\\", "\\\\").replace("'", "&apos;").replace(/\$\{([$.\w]+)\}/g, "',$1,'");
   //*/
@@ -232,7 +232,7 @@ window.mjst = function mjst(xml, data){
       (string || typeof xml.className === "string" ?
         html(loadXML("<".concat(id, ">", string ? xml : xml.innerHTML, "</", id, ">")).childNodes, []) :
         // XML could be loaded via Ajax or created runtime or passed as single node
-        // just to be sure we are parsing the childNodes lost
+        // just to be sure we are parsing the correct childNodes list
         html((xml.documentElement || xml).childNodes, [])
       ).join(""),
       i ? "}" : "",
