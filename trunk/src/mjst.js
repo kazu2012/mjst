@@ -26,7 +26,7 @@
  * myEl.innerHTML = mjst(new DOMParser().parseFromString('<root><?js var hello = "Hi There";?><js-hello/></root>', "text/xml"))
  */
 
-(function(){
+(function(window){
 
 /**
  * Transform a list of nodes into JavaScript and HTML strings operations
