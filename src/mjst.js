@@ -3,7 +3,7 @@
  * @repository http://code.google.com/p/mjst/
  * @author Andrea Giammarchi
  * @license Mit Style
- * @version 0.1.2
+ * @version 0.1.3
  */
 
 /**
@@ -82,7 +82,7 @@ function html(childNodes, data){
         // comments or other nodes will be simply replicated without HTML conversion but still JavaScript parsing
         // e.g. <!-- User: ${navigator.userAgent} --> will be transformed into
         //  <!-- User: Mozilla,Chrome,Safari,Opera or Shenaningans ... I meant IE -->
-        data.push(id, ".push('" + value(outerHTML(xml), false) + "')", n);
+        data.push(id, ".push('" + value(outerHTML(xml), false) + "')", n)
         break;
     };
   };
@@ -111,17 +111,16 @@ function nodeValue(xml){
   ;
 };
 
-/** @deprecated ... modified value to avoid comments replacement
+/**
  * Replace characters for a safe parse or put variables in the middle of the string
  * @param {String} string a matched string to sanitize
  * @param {String} match optional variable name ${myVar} => myVar
  * @return {String} replaced string
-
+ */
 function replace(string, match){
   return string.length === 1 ? replace[string] : "'," + match + ",'";
 };
- */
-
+ 
 /**
  * Sanitize strings for safe function body evaluation. Swap variables if presents.
  * @param {String} data generic string to sanitize 
@@ -130,10 +129,8 @@ function replace(string, match){
  */
 function value(data, xml){
   return (xml ? data.replace("'", "&apos;") : data)
-    .replace("\\", "\\\\")
-    .replace(/\$\{([$.[\]"'+\w]+)\}/g, "',$1,'")
+    .replace(/\\|\b|\f|\n|\r|\t|\$\{([$.[\]"'+\w]+)\}/g, replace)
   ;
-  // @deprecated - return data.replace(/\\|'|\$\{([$.[\]"'+\w]+)\}/g, replace)
 };
 
 /**
@@ -210,10 +207,14 @@ try{
   };
 };
 
-/** @deprecated set characters to sanitize
+// set characters to sanitize
 replace["\\"] = "\\\\";
-replace["'"] = "&apos;";
-*/
+replace["\b"] = "\\b";
+replace["\f"] = "\\f";
+replace["\n"] = "\\n";
+replace["\r"] = "\\r";
+replace["\t"] = "\\t";
+//replace["'"] = "&apos;";
 
 /**
  * Public core function able to transform JavaScript templates into valid HTML
