@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>mjst - test page</title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+    <style type="text/css">
+    * {
+      font-family: sans-serif;
+      font-szie: 8pt;
+    }
+    h1 {
+      font-size: 11pt;
+    }
+    </style>
+  </head>
+  <body>
+  </body>
+  <script type="text/javascript" src="http://mjst.googlecode.com/svn/trunk/src/mjst.js"></script>
+  <script type="text/javascript">
+  with(this.XMLHttpRequest ?
+    new XMLHttpRequest :
+    new ActiveXObject("Microsoft.MSXML")
+  ){
+    open("get", "index.xml", true);
+    onreadystatechange = function(){
+      if(readyState == 4)
+        document.body.innerHTML = mjst(responseXML);
+      ;
+    };
+    send(null);
+  };
+  </script>
+</html>

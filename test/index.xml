@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<tpl name="test for mjst">
+  <!-- Test For ${navigator.userAgent} -->
+  <h1>Thanks for trying msjt test page</h1>
+  <ol>
+    <?js
+      for(var
+        li = [
+          "If You can read this list",
+          "everything should be ok",
+          "If you cannot, please file a bug",
+          "in the <a href='http://code.google.com/p/mjst/'></a> repository, thanks."
+        ],
+        i = 0,
+        length = li.length,
+        tmp;
+        i < length;
+        ++i
+      ){
+        tmp = li[i];
+    ?>
+      <li><js-tmp/></li>
+    <js><![CDATA[
+    };
+    var style = "text-decoration:none;";
+    style += 'border-bottom: 1px dotted blue; color:#333';
+    ]]></js>
+    <?js
+      print('<li style="list-style:circle">', "now the question is if you cannot read ... how can you know you could file a bug?", '</li>');
+    ?>
+  </ol>
+  <a href="http://webreflection.blogspot.com/" style="${style}">by WebReflection</a>
+</tpl>

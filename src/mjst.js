@@ -3,7 +3,7 @@
  * @repository http://code.google.com/p/mjst/
  * @author Andrea Giammarchi
  * @license Mit Style
- * @version 0.1.3
+ * @version 0.1.4
  */
 
 /**
@@ -129,7 +129,7 @@ function replace(string, match){
  */
 function value(data, xml){
   return (xml ? data.replace("'", "&apos;") : data)
-    .replace(/\\|\b|\f|\n|\r|\t|\$\{([$.[\]"'+\w]+)\}/g, replace)
+    .replace(/\\|\x08|\f|\n|\r|\t|\$\{([$.[\]"'+\w]+)\}/g, replace)
   ;
 };
 
