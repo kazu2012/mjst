@@ -3,7 +3,7 @@
  * @repository http://code.google.com/p/mjst/
  * @author Andrea Giammarchi
  * @license Mit Style
- * @version 0.1.1
+ * @version 0.1.2
  */
 
 /**
@@ -67,7 +67,7 @@ function html(childNodes, data){
             // <?js
             // }
             // ?>
-            data.push(" ", (tmp = attributes[j]).name, "=\\'", value(tmp.value), "\\'")
+            data.push(" ", (tmp = attributes[j]).name, "=\\'", value(tmp.value, true), "\\'")
           ;
           if(xml.hasChildNodes()){
             data.push(">')", n);
@@ -82,7 +82,7 @@ function html(childNodes, data){
         // comments or other nodes will be simply replicated without HTML conversion but still JavaScript parsing
         // e.g. <!-- User: ${navigator.userAgent} --> will be transformed into
         //  <!-- User: Mozilla,Chrome,Safari,Opera or Shenaningans ... I meant IE -->
-        data.push(id, ".push('" + value(outerHTML(xml)) + "')", n);
+        data.push(id, ".push('" + value(outerHTML(xml), false) + "')", n);
         break;
     };
   };
@@ -111,26 +111,29 @@ function nodeValue(xml){
   ;
 };
 
-/**
+/** @deprecated ... modified value to avoid comments replacement
  * Replace characters for a safe parse or put variables in the middle of the string
  * @param {String} string a matched string to sanitize
  * @param {String} match optional variable name ${myVar} => myVar
  * @return {String} replaced string
- */
+
 function replace(string, match){
   return string.length === 1 ? replace[string] : "'," + match + ",'";
 };
+ */
 
 /**
  * Sanitize strings for safe function body evaluation. Swap variables if presents.
- * @param {String} data generic string to sanitize
- * @return {String} sanitized string
+ * @param {String} data generic string to sanitize 
+ * @param {Boolean} xml only if it is an XML attribute requires an extra replace
+ * @return {String} sanitize string
  */
-function value(data){
-  return data.replace(/\\|'|\$\{([$.[\]"'+\w]+)\}/g, replace)
-  /*TODO: test if 3 replaces without function are faster (both massive and small templates)
-  return data.replace("\\", "\\\\").replace("'", "&apos;").replace(/\$\{([$.\w]+)\}/g, "',$1,'");
-  //*/
+function value(data, xml){
+  return (xml ? data.replace("'", "&apos;") : data)
+    .replace("\\", "\\\\")
+    .replace(/\$\{([$.[\]"'+\w]+)\}/g, "',$1,'")
+  ;
+  // @deprecated - return data.replace(/\\|'|\$\{([$.[\]"'+\w]+)\}/g, replace)
 };
 
 /**
@@ -165,7 +168,7 @@ try{
   loadXML = function loadXML(data){
     var tmp = xml.parseFromString(data, "text/xml"), e;
     if(tmp.documentElement.nodeName == "parsererror")
-      throw new Error(nodeValue(tmp.documentElement) + n + data)
+      throw new Error(nodeValue(tmp.documentElement, false) + n + data)
     ;
     return tmp.firstChild;
   };
@@ -207,9 +210,10 @@ try{
   };
 };
 
-// set characters to sanitize
+/** @deprecated set characters to sanitize
 replace["\\"] = "\\\\";
 replace["'"] = "&apos;";
+*/
 
 /**
  * Public core function able to transform JavaScript templates into valid HTML
