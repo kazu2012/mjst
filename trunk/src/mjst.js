@@ -3,11 +3,15 @@
  * @repository http://code.google.com/p/mjst/
  * @author Andrea Giammarchi
  * @license Mit Style
- * @version 0.1.4
+ * @version 0.1.4.1
  */
 
 /**
+ * @requirements  for standard browsers or server side JavaScript: DOMParser and XMLSerializer constructors
+ * @requirements  for Internet Explorer and ActiveXObject based browsers: Microsoft.XMLDOM
+ *                the Microsoft.DOMDocument.3.0 may be implemented as fallback if necessary but so far IE 5+ works just fine
  * @compatibility
+ * @browsers
  *
  *             Avant 11+
  *             Chrome 1+
@@ -26,6 +30,42 @@
  *             Galeon 2+
  *             Shiretoko 3.5+
  *
+ * @server     every server side language should be able to pre parse mjst files without affecting <?js ?> nodes.
+ *
+ * @jsserver
+ *             coming soon tests for Rhino, Helma, V8CGI, and others ... any help would be appreciated
+ */
+
+/**
+ * @concept  The idea behind mjst is just the PHP stack. The same way PHP
+ *           parses its own scripts mjst parses its own tags. No conflicts
+ *           should be created if PHP short tag is *disabled*, a default 
+ *           and suggested configuration in any case.
+ *           Since PHP, as every other server side language, will parse its own tags
+ *           and nothing else, it is possible to create, if necessary, runtime <?js ?> tags
+ *           assigning whatever variable we need directly, as example, via json_encode
+ *           json_encode is 3 times faster than serialize and the layout will be a JavaScript
+ *           problem. Via mjst is possible to create fastest responses thanks to
+ *           delegated computation. The result is an XML+XSL(T) similar operation
+ *           except the template will use JavaScript rather than XSL to create the final layout.
+ *           Moreover, mjst is based on XML templates representation so the "valid template"
+ *           problems is simply delegated to whatever XML parser the server is able to use.
+ *           Once a template is valid XML, the rest is a front-end/JavaScript problem (team friendly then)
+ *           mjst would like to work with Rhino, Helma, Jaxer, V8CGI, and other server side JavaScript as well.
+ *           Right now no official tests but something will arrive soon.
+ *           Finally, I am planning to implement a sort of tutorial for CouchDB in order
+ *           to create a full stack Web based Application directly via JavaScript and nothing else, database included.
+ *
+ * @mustconsider-that
+ *           mjst ideal scenario is the real Ajax, the one with XML rather than JSON or text at the end of the acronym.
+ *           mjst could be in any case used via <script type="tpl/mjst">...structure...</script> nodes in the middle of the page.
+ *           This will make templates load operation transparent (zero latency) and we do not need necesary to produce html,
+ *           In fact, we could simply put a piece of library inside a mjst node in order to lazy evaluate its content.
+ *           In few words mjst could be a nice solution for mobile devices as well as explained in different
+ *           "Fast or even Faster WebPage" articles around the net.
+ *           On the other hand, if the page will rely 100% into mjst parsed via clients, rather than pre parsed in the server,
+ *           search engines could have some problem to understand the page content unless these won't be able
+ *           to analize pieces of JSON as well as part of web page content.
  */
 
 /**
@@ -61,13 +101,21 @@ function html(childNodes, data){
       case 1:
       case 7:
         /** JavaScript nodes can be called js, jst, mjs, mjst, jscript, or javascript case insensitive
+         * If anybody is asking why there is no "script" support the answer is:
+         * mjst is a template engine, and as template engine it MUST be possible to create or handle <script> nodes as well for the layout!
+         * 
          * <js>...</js> will evaluate the content which should be inside a comment, or inside a CDATA section (valid template output)
          * <?js ...?> this is case 7, same as above except it does not require CDATA or comments
          * <js-myVar/> this will put directly myVar in the flow (content) as evaluated variable.
+         * 
          * The latter case equivalent in other templates system is <%=myVar%>
          * To avoid client/server ambiguity and to respect standards I have decided that <%=myVar%> won't be supported.
          * In any case, we are talking about just one extra character .................. <js-myVar/>
          * I am considering to implement a runtime namespace to handle this case as well <js:myVar/> but right now this is not supported
+         * 
+         * The short tag <js-varname/> tag cannot contain every special character so
+         * the most flexible way to print out a variable is PHP style: <?js print(whatever[0].weNeed["for" + purpose]) ?>
+         * Latter example is necessary if we do not want to normalize every reference name.
          */
         if(tmp = (nodeName = xml.nodeName).match(/^(?:js|jst|mjs|mjst|jscript|javascript)(?:-([$.[\]"'+\w]+))?$/i)){
           data.push(tmp[1] ? "print(" + tmp[1] + ")" : nodeValue(xml), n);
@@ -78,7 +126,7 @@ function html(childNodes, data){
             tmp = data.push(id, ".push('<", nodeName = nodeName.toUpperCase());
             j < l; ++j
           )
-            // attributes caonnot use directly JavaScript: these are simply ... attributes!
+            // attributes cannot use directly JavaScript: these are simply ... attributes!
             // It is possible in any case to referer to a variable already defined
             // <?js
             //   for(var i = 0, isLast; i < rows.length; ++i){
@@ -117,6 +165,10 @@ function html(childNodes, data){
  * @return {String} the generic DOM node content
  */
 function nodeValue(xml){
+  // maybe it's a Firefox specific problem but in any case
+  // this function helps to retrieve content in comment, CDATA, and other nodes
+  // I don't hink I'll ever remove this private function
+  // TODO: think about it
   if(xml.nodeType === 1){
       for(var
         childNodes = xml.childNodes,
@@ -150,6 +202,7 @@ function replace(string, match){
  */
 function value(data, xml){
   return (xml ? data.replace("'", "&apos;") : data)
+    //TODO: be sure \x08 and \f are the same in IE - edge cases though (see replace properties around line 290)
     .replace(/\\|\x08|\f|\n|\r|\t|\$\{([$.[\]"'+\w]+)\}/g, replace)
   ;
 };
@@ -204,6 +257,8 @@ try{
 }catch(e){
   // Internet Explorer ...
   xml = new ActiveXObject("Microsoft.XMLDOM");
+  // I promise the day somebody will have a single problem with sync loadXML I'll remove next comment
+  //xml.async=false;
   
   /**
    * Try to load xml or xhtml string content into an XML document
@@ -229,13 +284,13 @@ try{
 };
 
 // set characters to sanitize
+//TODO: be sure IE does not mess up with some char (e.g. \b and \f) - edge cases though
 replace["\\"] = "\\\\";
 replace["\b"] = "\\b";
 replace["\f"] = "\\f";
 replace["\n"] = "\\n";
 replace["\r"] = "\\r";
 replace["\t"] = "\\t";
-//replace["'"] = "&apos;";
 
 /**
  * Public core function able to transform JavaScript templates into valid HTML
