@@ -9,7 +9,7 @@
           "If You can read this list",
           "everything should be ok",
           "If you cannot, please file a bug",
-          "in the <a href='http://code.google.com/p/mjst/'></a> repository, thanks."
+          "in the <a href='http://code.google.com/p/mjst/'>repository</a>, thanks."
         ],
         i = 0,
         length = li.length,

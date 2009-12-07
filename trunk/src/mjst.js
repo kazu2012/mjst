@@ -7,7 +7,28 @@
  */
 
 /**
- * @compatibility no idea yet, tested into Firefox, IE, Chrome, Opera
+ * @compatibility
+ *
+ *             Avant 11+
+ *             Chrome 1+
+ *             Firefox 0.9+
+ *             Flock 1.2+
+ *             Iceweasel 2+
+ *             IE 5.5+ (probably real 5 as well)
+ *             K-Meleon 1.5+
+ *             Navigator 8+
+ *             Opera 8+
+ *             Safari 3+
+ *             SeaMonkey 1.1.14+
+ *             Epiphany 2+
+ *             Iceape 1.1+
+ *             Kazehakase 0.5+
+ *             Galeon 2+
+ *             Shiretoko 3.5+
+ *
+ */
+
+/**
  * @example
  * 
  * // via text (e.g. Ajax or innerHTML from a template node)
