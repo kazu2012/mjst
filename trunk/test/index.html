@@ -6,10 +6,10 @@
     <style type="text/css">
     * {
       font-family: sans-serif;
-      font-szie: 8pt;
+      font-size: 8pt;
     }
     h1 {
-      font-size: 11pt;
+      font-size: 10pt;
     }
     </style>
   </head>
@@ -17,17 +17,26 @@
   </body>
   <script type="text/javascript" src="http://mjst.googlecode.com/svn/trunk/src/mjst.js"></script>
   <script type="text/javascript">
-  with(this.XMLHttpRequest ?
-    new XMLHttpRequest :
-    new ActiveXObject("Microsoft.MSXML")
-  ){
-    open("get", "index.xml", true);
-    onreadystatechange = function(){
-      if(readyState == 4)
-        document.body.innerHTML = mjst(responseXML);
-      ;
+  function testCase(){
+    with(this.XMLHttpRequest ?
+      new XMLHttpRequest :
+      new ActiveXObject("Microsoft.XMLHTTP")
+    ){
+      open("get", "index.xml?_=" + Math.random(), true);
+      onreadystatechange = function(){
+        if(readyState == 4){
+          document.body.innerHTML = mjst(responseXML);
+          if(++i < 3)
+            setTimeout(function(){
+              document.body.innerHTML = "...reload...";
+              testCase();
+            }, 1000);
+          ;
+        };
+      };
+      send(null);
     };
-    send(null);
   };
+  var i = 0;
   </script>
 </html>
