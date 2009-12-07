@@ -28,8 +28,8 @@
           document.body.innerHTML = mjst(responseXML);
           if(++i < 3)
             setTimeout(function(){
-              document.body.innerHTML = "...reload...";
-              testCase();
+              document.body.innerHTML = "...reload " + i + "...";
+              setTimeout(testCase, 1000);
             }, 1000);
           ;
         };
@@ -37,6 +37,7 @@
       send(null);
     };
   };
+  testCase();
   var i = 0;
   </script>
 </html>
