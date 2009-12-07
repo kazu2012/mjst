@@ -3,7 +3,7 @@
  * @repository http://code.google.com/p/mjst/
  * @author Andrea Giammarchi
  * @license Mit Style
- * @version 0.1.4.1
+ * @version 0.1.4.2
  */
 
 /**
@@ -55,6 +55,11 @@
  *           Right now no official tests but something will arrive soon.
  *           Finally, I am planning to implement a sort of tutorial for CouchDB in order
  *           to create a full stack Web based Application directly via JavaScript and nothing else, database included.
+ *
+ * @cache    to emulate data caching it is possible to store data in the client side.
+ *           This means that other intractions do not need to refetch same data from the database, as example,
+ *           because data has been already assigned, hopefully via namespace, in the client side.
+ *           Of course it is still possible to use APC, memcache, or other common server cache strategies as well.
  *
  * @mustconsider-that
  *           mjst ideal scenario is the real Ajax, the one with XML rather than JSON or text at the end of the acronym.
@@ -127,7 +132,7 @@ function html(childNodes, data){
             j < l; ++j
           )
             // attributes cannot use directly JavaScript: these are simply ... attributes!
-            // It is possible in any case to referer to a variable already defined
+            // It is possible in any case to reference a variable already defined
             // <?js
             //   for(var i = 0, isLast; i < rows.length; ++i){
             //     isLast = (i === rows.length - 1 ? "last-one" : "");
@@ -202,7 +207,7 @@ function replace(string, match){
  */
 function value(data, xml){
   return (xml ? data.replace("'", "&apos;") : data)
-    //TODO: be sure \x08 and \f are the same in IE - edge cases though (see replace properties around line 290)
+    //TODO: be sure \x08 and \f are the same in IE - edge cases though (see replace properties around line 300)
     .replace(/\\|\x08|\f|\n|\r|\t|\$\{([$.[\]"'+\w]+)\}/g, replace)
   ;
 };
@@ -239,7 +244,7 @@ try{
   loadXML = function loadXML(data){
     var tmp = xml.parseFromString(data, "text/xml"), e;
     if(tmp.documentElement.nodeName == "parsererror")
-      throw new Error(nodeValue(tmp.documentElement, false) + n + data)
+      throw new Error(nodeValue(tmp.documentElement) + n + data)
     ;
     return tmp.firstChild;
   };
@@ -294,6 +299,9 @@ replace["\t"] = "\\t";
 
 /**
  * Public core function able to transform JavaScript templates into valid HTML
+ * Code execution is partially sandboxed inside the runtime compiled function.
+ * It's a good practice to define templates variables local via "var" prefix
+ * But if we need global scope, we can simply use it. This is good for cached data.
  * @param {String/DOM} xml a template via string or an XML template document or an HTML node with a template content (e.g. <script type="text/html">...</script>)
  * @param {Object} data optional arguments to pass via "with" into Function body. Since "with" is a slower operation it is not implemented when data is empty while it is implemented if data is a generic object. This means a template could have up to two pre-compiled functions assigned (one with a "with" statement, one without)
  * @return {String} transformed template as valid HTML string
@@ -306,6 +314,10 @@ window.mjst = function mjst(xml, data){
   ;
   return (value[i] || (value[i] = new Function(id, print.concat(
       i ?
+        // arguments annihalation
+        // if we pass a configuration/data object arguments will be that object
+        // if we don't pass anything "with" statement won't exist (faster)
+        // and arguments will be undefined
         "with(arguments=arguments[1]){" :
         "arguments=arguments." + id + n
       ,
